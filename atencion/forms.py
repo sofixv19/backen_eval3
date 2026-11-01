@@ -42,9 +42,10 @@ class SolicitudForm(EstiloBootstrapMixin, forms.ModelForm):
 
     class Meta:
         model = SolicitudVecinal
-        fields = ['vecino', 'delegacion', 'funcionario', 'tipo', 'prioridad', 'descripcion']
+        fields = ['vecino', 'delegacion', 'funcionario', 'tipo', 'prioridad', 'descripcion', 'foto']
         widgets = {
             'funcionario': FuncionarioSelect,
+            'foto': forms.FileInput(attrs={'accept': 'image/*'}),
             'descripcion': forms.Textarea(attrs={
                 'rows': 4,
                 'placeholder': 'Ej: Solicita poda de árbol que obstruye el alumbrado en la esquina de su pasaje.',

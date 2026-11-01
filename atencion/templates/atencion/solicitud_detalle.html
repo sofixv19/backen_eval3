@@ -63,6 +63,13 @@
     {% endif %}
 </div>
 
+{% if solicitud.foto %}
+<h2 class="h5 mt-4 mb-3">Foto del problema</h2>
+<a href="{{ solicitud.foto.url }}" target="_blank" class="foto-evidencia" title="Ver en tamaño completo">
+    <img src="{{ solicitud.foto.url }}" alt="Foto de la solicitud {{ solicitud.codigo }}">
+</a>
+{% endif %}
+
 {% if solicitud.estado == "Abierta" and perms.atencion.change_solicitudvecinal %}
 <div class="info-card mt-4" style="max-width: 640px;">
     <h2 class="h6 mb-3">Cerrar solicitud</h2>

@@ -20,18 +20,31 @@ class CategoriaForm(EstiloBootstrapMixin, forms.ModelForm):
 
 
 class ActividadForm(EstiloBootstrapMixin, forms.ModelForm):
+    quitar_foto = forms.BooleanField(label='Quitar la foto actual', required=False)
+
     class Meta:
         model = Actividad
-        fields = ['codigo', 'fecha', 'delegacion', 'categoria', 'descripcion', 'funcionario', 'estado']
+        fields = ['codigo', 'fecha', 'delegacion', 'categoria', 'descripcion', 'funcionario', 'estado',
+                  'foto_evidencia']
         widgets = {
-            'fecha': forms.DateInput(attrs={'type': 'date'}),
+            'fecha': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'descripcion': forms.Textarea(attrs={'rows': 3}),
+            'foto_evidencia': forms.FileInput(attrs={'accept': 'image/*'}),
         }
 
     def clean_codigo(self):
         # Normaliza el código (sin espacios al borde, en mayúsculas) antes
         # de que Django valide la restricción unique=True del modelo.
         return self.cleaned_data['codigo'].strip().upper()
+
+    def save(self, commit=True):
+        actividad = super().save(commit=False)
+        # "Quitar la foto actual" solo aplica si no se subió una nueva.
+        if self.cleaned_data.get('quitar_foto') and 'foto_evidencia' not in self.files:
+            actividad.foto_evidencia = None
+        if commit:
+            actividad.save()
+        return actividad
 
 
 class SeguimientoForm(EstiloBootstrapMixin, forms.ModelForm):
@@ -42,8 +55,9 @@ class SeguimientoForm(EstiloBootstrapMixin, forms.ModelForm):
 
     class Meta:
         model = SeguimientoActividad
-        fields = ['estado_nuevo', 'observacion']
+        fields = ['estado_nuevo', 'observacion', 'foto']
         widgets = {
+            'foto': forms.FileInput(attrs={'accept': 'image/*'}),
             'observacion': forms.Textarea(attrs={
                 'rows': 4,
                 'placeholder': 'Ej: Se visitó el sector y se coordinó el retiro de escombros con la cuadrilla municipal.',

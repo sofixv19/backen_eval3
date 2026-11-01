@@ -140,7 +140,7 @@ def solicitudes_listado(request):
 @permiso_requerido('atencion.add_solicitudvecinal')
 def solicitud_crear(request):
     if request.method == 'POST':
-        form = SolicitudForm(request.POST)
+        form = SolicitudForm(request.POST, request.FILES)
         if form.is_valid():
             with transaction.atomic():
                 solicitud = form.save(commit=False)

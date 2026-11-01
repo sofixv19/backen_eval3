@@ -77,6 +77,18 @@
     </div>
 </div>
 
+<h2 class="h5 mt-5 mb-3">Foto de evidencia</h2>
+{% if actividad.foto_evidencia %}
+<a href="{{ actividad.foto_evidencia.url }}" target="_blank" class="foto-evidencia" title="Ver en tamaño completo">
+    <img src="{{ actividad.foto_evidencia.url }}" alt="Foto de evidencia de {{ actividad.codigo }}">
+</a>
+{% else %}
+<p class="text-muted">
+    Esta actividad no tiene foto de evidencia.
+    {% if perms.gestion.change_actividad %}<a href="{% url 'gestion:editar' actividad.id %}">Agregar una foto</a>.{% endif %}
+</p>
+{% endif %}
+
 <h2 class="h5 mt-5 mb-3">Historial de seguimiento</h2>
 {% if seguimientos %}
 <div class="table-responsive">
@@ -86,6 +98,7 @@
             <th>Fecha</th>
             <th>Cambio de estado</th>
             <th>Observación</th>
+            <th>Foto</th>
             <th>Registrado por</th>
         </tr>
     </thead>
@@ -99,6 +112,13 @@
                 {% include "gestion/_badge_estado.html" with estado=s.estado_nuevo %}
             </td>
             <td>{{ s.observacion }}</td>
+            <td>
+                {% if s.foto %}
+                <a href="{{ s.foto.url }}" target="_blank" class="foto-miniatura" title="Ver foto">
+                    <img src="{{ s.foto.url }}" alt="Foto del seguimiento">
+                </a>
+                {% else %}<span class="text-muted">—</span>{% endif %}
+            </td>
             <td>{{ s.responsable.get_username|default:"—" }}</td>
         </tr>
         {% endfor %}

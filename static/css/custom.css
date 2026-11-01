@@ -108,6 +108,40 @@ code {
 }
 
 .avatar-sm { width: 30px; height: 30px; font-size: .85rem; border: 2px solid rgba(255, 255, 255, .7); }
+.avatar-lista { width: 36px; height: 36px; font-size: .95rem; text-decoration: none; }
+
+/* Fotos de evidencia (actividades, seguimientos, solicitudes) */
+.foto-evidencia {
+  display: inline-block;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--color-borde);
+  box-shadow: 0 6px 18px rgba(30, 20, 20, .14);
+  background: #fff;
+  max-width: 100%;
+}
+
+.foto-evidencia img {
+  display: block;
+  max-width: 100%;
+  max-height: 420px;
+  object-fit: contain;
+}
+
+.foto-miniatura {
+  display: inline-block;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--color-borde);
+}
+
+.foto-miniatura img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .avatar-md { width: 64px; height: 64px; font-size: 1.5rem; }
 .avatar-xl {
   width: 104px;

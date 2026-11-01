@@ -80,7 +80,7 @@ def registrar_seguimiento(request, actividad_id):
     actividad = get_object_or_404(Actividad.objects.select_related('delegacion', 'categoria'), pk=actividad_id)
 
     if request.method == 'POST':
-        form = SeguimientoForm(request.POST, actividad=actividad)
+        form = SeguimientoForm(request.POST, request.FILES, actividad=actividad)
         if form.is_valid():
             with transaction.atomic():
                 # Bloquea la fila para que dos usuarios no cambien el estado a la vez.
@@ -135,10 +135,17 @@ def resumen(request):
 # operacional exigida por la pauta (relaciona Delegación + Categoría).
 # ---------------------------------------------------------------------------
 
+def _borrar_archivo(campo_archivo, nombre=None):
+    """Borra del disco un archivo subido (si existe)."""
+    nombre = nombre if nombre is not None else campo_archivo.name
+    if nombre:
+        campo_archivo.storage.delete(nombre)
+
+
 @permiso_requerido('gestion.add_actividad')
 def crear(request):
     if request.method == 'POST':
-        form = ActividadForm(request.POST)
+        form = ActividadForm(request.POST, request.FILES)
         if form.is_valid():
             actividad = form.save()
             messages.success(request, f'Actividad "{actividad.codigo}" registrada correctamente.')
@@ -160,9 +167,13 @@ def editar(request, actividad_id):
     actividad = get_object_or_404(Actividad, pk=actividad_id)
 
     if request.method == 'POST':
-        form = ActividadForm(request.POST, instance=actividad)
+        foto_anterior = actividad.foto_evidencia.name
+        form = ActividadForm(request.POST, request.FILES, instance=actividad)
         if form.is_valid():
             actividad = form.save()
+            # Si la foto se cambió o se quitó, se borra la anterior del disco.
+            if foto_anterior and foto_anterior != actividad.foto_evidencia.name:
+                _borrar_archivo(actividad.foto_evidencia, foto_anterior)
             messages.success(request, f'Actividad "{actividad.codigo}" actualizada correctamente.')
             return redirect(actividad.get_absolute_url())
     else:
@@ -183,7 +194,10 @@ def eliminar(request, actividad_id):
 
     if request.method == 'POST':
         codigo = actividad.codigo
+        fotos = [actividad.foto_evidencia] + [s.foto for s in actividad.seguimientos.all()]
         actividad.delete()
+        for foto in fotos:
+            _borrar_archivo(foto)
         messages.success(request, f'Actividad "{codigo}" eliminada correctamente.')
         return redirect('gestion:listado')
 

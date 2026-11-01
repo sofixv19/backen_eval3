@@ -10,6 +10,7 @@ from django.db import models
 from django.urls import reverse
 
 from delegaciones.models import Delegacion
+from sgr_evaluacion.imagenes import VALIDADORES_IMAGEN
 
 
 class Categoria(models.Model):
@@ -62,6 +63,13 @@ class Actividad(models.Model):
     estado = models.CharField(
         'Estado', max_length=20, choices=Estado.choices, default=Estado.PENDIENTE,
     )
+    foto_evidencia = models.FileField(
+        'Foto de evidencia',
+        upload_to='evidencias/actividades/',
+        blank=True,
+        validators=VALIDADORES_IMAGEN,
+        help_text='Opcional. Foto del lugar o de la actividad (JPG, PNG, WEBP o GIF, máx. 5 MB).',
+    )
 
     class Meta:
         verbose_name = 'Actividad'
@@ -101,6 +109,13 @@ class SeguimientoActividad(models.Model):
     estado_anterior = models.CharField('Estado anterior', max_length=20, choices=Actividad.Estado.choices)
     estado_nuevo = models.CharField('Nuevo estado', max_length=20, choices=Actividad.Estado.choices)
     observacion = models.TextField('Observación')
+    foto = models.FileField(
+        'Foto del avance',
+        upload_to='evidencias/seguimientos/',
+        blank=True,
+        validators=VALIDADORES_IMAGEN,
+        help_text='Opcional. Por ejemplo, el trabajo terminado (máx. 5 MB).',
+    )
     fecha = models.DateTimeField('Fecha del seguimiento', auto_now_add=True)
 
     class Meta:

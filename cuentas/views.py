@@ -140,7 +140,7 @@ def dashboard_administrativo(request):
 
 @grupo_requerido('Administrador')
 def usuarios_listado(request):
-    usuarios = Usuario.objects.all().order_by('username').prefetch_related('groups')
+    usuarios = Usuario.objects.all().order_by('username').select_related('perfil').prefetch_related('groups')
     contexto = {'titulo_pagina': 'Usuarios del sistema', 'usuarios': usuarios}
     return render(request, 'cuentas/usuarios_listado.html', contexto)
 

@@ -13,6 +13,7 @@ from django.urls import reverse
 
 from delegaciones.models import Delegacion
 from funcionarios.models import Funcionario
+from sgr_evaluacion.imagenes import VALIDADORES_IMAGEN
 
 
 class Vecino(models.Model):
@@ -65,6 +66,13 @@ class SolicitudVecinal(models.Model):
     tipo = models.CharField('Tipo', max_length=20, choices=Tipo.choices, default=Tipo.SOLICITUD)
     prioridad = models.CharField('Prioridad', max_length=10, choices=Prioridad.choices, default=Prioridad.MEDIA)
     descripcion = models.TextField('Descripción de la solicitud')
+    foto = models.FileField(
+        'Foto del problema',
+        upload_to='evidencias/solicitudes/',
+        blank=True,
+        validators=VALIDADORES_IMAGEN,
+        help_text='Opcional. Foto que muestre el problema (JPG, PNG, WEBP o GIF, máx. 5 MB).',
+    )
     estado = models.CharField('Estado', max_length=10, choices=Estado.choices, default=Estado.ABIERTA)
     respuesta = models.TextField('Respuesta / cierre', blank=True)
     registrada_por = models.ForeignKey(
