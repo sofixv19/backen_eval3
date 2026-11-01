@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block titulo %}{{ titulo_pagina }}{% endblock %}
+
+{% block contenido %}
+<div class="en-construccion">
+    <svg class="en-construccion-icon" style="color: var(--color-rojo);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M12 2 1 21h22L12 2Z" fill="currentColor"/>
+        <rect x="11" y="9" width="2" height="6" fill="#fff"/>
+        <rect x="11" y="16" width="2" height="2" fill="#fff"/>
+    </svg>
+    <h1 class="h4 mb-2">{{ accion }}</h1>
+    {% if cargo.metas.count %}
+    <p class="text-danger small mb-2">
+        Este cargo tiene {{ cargo.metas.count }} meta{{ cargo.metas.count|pluralize }} asociada{{ cargo.metas.count|pluralize }}.
+        Se eliminará{{ cargo.metas.count|pluralize:",n" }} junto con el cargo.
+    </p>
+    {% endif %}
+    <p class="text-muted mb-4">Esta acción no se puede deshacer. ¿Confirmas que deseas continuar?</p>
+    <form method="post" class="d-flex justify-content-center gap-2">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+        <a href="{{ volver_url }}" class="btn btn-outline-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

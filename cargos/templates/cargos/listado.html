@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block titulo %}Cargos y metas{% endblock %}
+
+{% block contenido %}
+<p class="text-uppercase small eyebrow mb-2">Mantenedor · Trabajo en equipo</p>
+<h1 class="h2 mb-1">Cargos y metas institucionales</h1>
+<p class="text-muted mb-4">
+    {{ cargos|length }} cargo{{ cargos|length|pluralize }} registrado{{ cargos|length|pluralize }}.
+</p>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    {% if perms.cargos.add_cargofuncion %}
+    <a href="{% url 'cargos:crear' %}" class="btn btn-institucional btn-sm">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="me-1"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        Agregar cargo
+    </a>
+    {% else %}
+    <span></span>
+    {% endif %}
+
+    <form method="get" class="d-flex gap-2 buscador-form" role="search">
+        <input type="search" name="q" value="{{ query }}" class="form-control form-control-sm"
+               placeholder="Buscar por nombre o descripción...">
+        <button type="submit" class="btn btn-outline-secondary btn-sm text-nowrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Buscar
+        </button>
+    </form>
+</div>
+
+<div class="table-responsive">
+<table class="table bg-white align-middle">
+    <thead>
+        <tr>
+            <th>Cargo</th>
+            <th>Descripción</th>
+            <th>Vigente</th>
+            <th>N&deg; metas</th>
+            <th class="text-end">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cargo in cargos %}
+        <tr>
+            <td><a href="{% url 'cargos:detalle' cargo.id %}">{{ cargo.nombre_cargo }}</a></td>
+            <td>{{ cargo.descripcion|default:"—"|truncatechars:60 }}</td>
+            <td>
+                {% if cargo.vigente %}
+                <span class="badge-estado badge-realizado">Vigente</span>
+                {% else %}
+                <span class="badge-estado badge-pendiente">No vigente</span>
+                {% endif %}
+            </td>
+            <td>{{ cargo.metas.count }}</td>
+            <td class="text-end">
+                {% if perms.cargos.change_cargofuncion %}
+                <a href="{% url 'cargos:editar' cargo.id %}" class="btn btn-sm btn-outline-secondary">Modificar</a>
+                {% endif %}
+                {% if perms.cargos.delete_cargofuncion %}
+                <a href="{% url 'cargos:eliminar' cargo.id %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-muted text-center py-4">No hay cargos que coincidan con la búsqueda.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

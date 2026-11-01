@@ -1,0 +1,30 @@
+[
+    {
+        "cargo": "Funcionario Operativo",
+        "descripcion": "Atención directa a vecinos y ejecución de actividades en terreno.",
+        "meta": "Registrar el 100% de las atenciones diarias en terreno",
+        "unidad": "Porcentaje",
+        "ponderacion": 40
+    },
+    {
+        "cargo": "Verificador / Auditor",
+        "descripcion": "Revisión y validación de evidencias de las actividades registradas.",
+        "meta": "Validar evidencias y respaldos en menos de 48 horas",
+        "unidad": "Horas",
+        "ponderacion": 60
+    },
+    {
+        "cargo": "Coordinador Estratégico",
+        "descripcion": "Supervisión del cumplimiento de metas de su equipo de trabajo.",
+        "meta": "Supervisar el cumplimiento de metas del equipo a cargo",
+        "unidad": "Porcentaje",
+        "ponderacion": 50
+    },
+    {
+        "cargo": "Encargado de Delegación",
+        "descripcion": "Responsable administrativo de una delegación municipal.",
+        "meta": "Mantener actualizado el registro de actividades de la delegación",
+        "unidad": "Porcentaje",
+        "ponderacion": 30
+    }
+]
