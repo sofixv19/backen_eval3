@@ -5,12 +5,58 @@ agregando estilos de Bootstrap) y gestión de usuarios/perfiles.
 """
 from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm, SetPasswordForm
+from django.contrib.auth.forms import (
+    AuthenticationForm,
+    PasswordChangeForm,
+    PasswordResetForm,
+    SetPasswordForm,
+)
 from django.contrib.auth.models import Group
 
 from sgr_evaluacion.estilos_formulario import EstiloBootstrapMixin
 
+from .models import PerfilUsuario
+
 Usuario = get_user_model()
+
+TAMANO_MAXIMO_FOTO_MB = 2
+
+
+class MisDatosForm(EstiloBootstrapMixin, forms.ModelForm):
+    """Datos personales que cada usuario puede editar en "Mi perfil"."""
+
+    class Meta:
+        model = Usuario
+        fields = ['first_name', 'last_name', 'email']
+        labels = {
+            'first_name': 'Nombres',
+            'last_name': 'Apellidos',
+            'email': 'Correo electrónico',
+        }
+        help_texts = {
+            'email': 'Se usa para recuperar tu contraseña.',
+        }
+
+
+class FotoPerfilForm(EstiloBootstrapMixin, forms.ModelForm):
+    """Foto de perfil (opcional), con límite de tamaño."""
+
+    class Meta:
+        model = PerfilUsuario
+        fields = ['foto']
+        widgets = {
+            'foto': forms.FileInput(attrs={'accept': 'image/*'}),
+        }
+
+    def clean_foto(self):
+        foto = self.cleaned_data.get('foto')
+        if foto and foto.size > TAMANO_MAXIMO_FOTO_MB * 1024 * 1024:
+            raise forms.ValidationError(f'La foto no puede pesar más de {TAMANO_MAXIMO_FOTO_MB} MB.')
+        return foto
+
+
+class CambiarClaveForm(EstiloBootstrapMixin, PasswordChangeForm):
+    """Cambio de contraseña del propio usuario (pide la contraseña actual)."""
 
 
 class LoginForm(EstiloBootstrapMixin, AuthenticationForm):

@@ -1,12 +1,5 @@
-"""
-Rutas principales del proyecto SGR - Evaluación 3 (Programación Backend).
-
-Django Admin se mantiene registrado (por si se necesita para alguna
-tarea puntual de soporte), pero NO se usa para ninguna operación del
-sistema: todas las operaciones (login, CRUD, recuperación de contraseña)
-se realizan a través de las rutas propias de cada app, con Django
-Templates.
-"""
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import RedirectView
@@ -19,3 +12,8 @@ urlpatterns = [
     path('gestion/', include('gestion.urls')),
     path('cargos/', include('cargos.urls')),
 ]
+
+# Sirve las fotos de perfil subidas por los usuarios (solo con DEBUG=True,
+# que es como corre el servidor de desarrollo en local y en la instancia EC2).
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

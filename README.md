@@ -75,6 +75,16 @@ usuarios** (`/cuentas/usuarios/`, exclusivo del perfil Administrador). Al
 iniciar sesión, cada usuario es redirigido automáticamente al dashboard que
 corresponde a su perfil.
 
+## Mi perfil
+
+Cualquier usuario autenticado tiene una página **Mi perfil**
+(`/cuentas/mi-perfil/`, accesible desde su nombre en el menú superior) donde
+puede subir o cambiar su **foto de perfil** (JPG, PNG, WEBP o GIF, máx. 2 MB),
+editar su nombre y correo, y **cambiar su contraseña** (pidiendo la
+contraseña actual). La foto se guarda en el modelo `PerfilUsuario`
+(relación 1 a 1 con el usuario de Django) y los archivos subidos quedan en
+la carpeta `media/`, que no se sube a GitHub.
+
 ## Mantenedores y transacción
 
 - **Mantenedor de Delegaciones** (`/delegaciones/`): crear, buscar, listar,

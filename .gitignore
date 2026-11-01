@@ -17,6 +17,9 @@ db.sqlite3
 # Archivos estáticos recolectados (collectstatic, en el servidor)
 staticfiles/
 
+# Fotos de perfil subidas por los usuarios
+media/
+
 # Django
 *.log
 local_settings.py

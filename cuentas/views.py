@@ -13,15 +13,24 @@ templates para mantener el estilo del sitio.
 """
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login, logout
+from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 
 from delegaciones.models import Delegacion
 from gestion.models import Actividad, Categoria
 
 from .decorators import grupo_requerido
-from .forms import LoginForm, UsuarioCreacionForm, UsuarioEdicionForm
+from .forms import (
+    CambiarClaveForm,
+    FotoPerfilForm,
+    LoginForm,
+    MisDatosForm,
+    UsuarioCreacionForm,
+    UsuarioEdicionForm,
+)
+from .models import PerfilUsuario
 
 Usuario = get_user_model()
 
@@ -173,3 +182,73 @@ def usuario_cambiar_estado(request, user_id):
             estado = 'activado' if usuario.is_active else 'desactivado'
             messages.success(request, f'Usuario "{usuario.username}" {estado} correctamente.')
     return redirect('cuentas:usuarios_listado')
+
+
+# ---------------------------------------------------------------------------
+# Mi perfil: cada usuario autenticado (cualquier perfil) puede ver y editar
+# sus propios datos, su foto y cambiar su contraseña.
+# ---------------------------------------------------------------------------
+
+def _nombre_perfil(usuario):
+    grupo = usuario.groups.first()
+    if grupo:
+        return grupo.name
+    if usuario.is_superuser:
+        return 'Administrador'
+    return 'Sin perfil asignado'
+
+
+@login_required(login_url='cuentas:login')
+def mi_perfil(request):
+    perfil, _ = PerfilUsuario.objects.get_or_create(usuario=request.user)
+
+    if request.method == 'POST':
+        # Se guarda el nombre de la foto actual ANTES de validar, porque al
+        # validar el formulario Django ya asigna la foto nueva al perfil.
+        foto_anterior = perfil.foto.name if perfil.foto else ''
+        form_datos = MisDatosForm(request.POST, instance=request.user)
+        form_foto = FotoPerfilForm(request.POST, request.FILES, instance=perfil)
+        if form_datos.is_valid() and form_foto.is_valid():
+            form_datos.save()
+            if 'foto' in request.FILES:
+                perfil = form_foto.save()
+                # Borra del disco la foto reemplazada, para no acumular archivos.
+                if foto_anterior and foto_anterior != perfil.foto.name:
+                    perfil.foto.storage.delete(foto_anterior)
+            messages.success(request, 'Tu perfil se actualizó correctamente.')
+            return redirect('cuentas:mi_perfil')
+    else:
+        form_datos = MisDatosForm(instance=request.user)
+        form_foto = FotoPerfilForm(instance=perfil)
+
+    contexto = {
+        'titulo_pagina': 'Mi perfil',
+        'perfil': perfil,
+        'nombre_perfil': _nombre_perfil(request.user),
+        'form_datos': form_datos,
+        'form_foto': form_foto,
+    }
+    return render(request, 'cuentas/mi_perfil.html', contexto)
+
+
+@login_required(login_url='cuentas:login')
+def quitar_foto(request):
+    if request.method == 'POST':
+        perfil = PerfilUsuario.objects.filter(usuario=request.user).first()
+        if perfil and perfil.foto:
+            perfil.foto.delete(save=True)
+            messages.success(request, 'Foto de perfil eliminada.')
+    return redirect('cuentas:mi_perfil')
+
+
+class CambiarClaveView(auth_views.PasswordChangeView):
+    """Cambio de contraseña del propio usuario (vista oficial de Django;
+    mantiene la sesión abierta después del cambio)."""
+
+    template_name = 'cuentas/cambiar_clave.html'
+    form_class = CambiarClaveForm
+    success_url = reverse_lazy('cuentas:mi_perfil')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Tu contraseña se cambió correctamente.')
+        return super().form_valid(form)

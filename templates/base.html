@@ -46,9 +46,18 @@
                         </li>
                         {% endif %}
                         <li class="nav-item ms-lg-3 d-flex align-items-center">
-                            <span class="nav-link text-white-50 small pe-lg-2">
-                                {{ user.get_username }}{% with grupo=user.groups.first %}{% if grupo %} · {{ grupo.name }}{% elif user.is_superuser %} · Administrador{% endif %}{% endwith %}
-                            </span>
+                            <a class="nav-link nav-perfil small pe-lg-2" href="{% url 'cuentas:mi_perfil' %}" title="Mi perfil">
+                                <span class="avatar avatar-sm">
+                                    {% if user.perfil.foto %}
+                                        <img src="{{ user.perfil.foto.url }}" alt="">
+                                    {% else %}
+                                        <span>{{ user.get_username|first|upper }}</span>
+                                    {% endif %}
+                                </span>
+                                <span>
+                                    {{ user.get_username }}{% with grupo=user.groups.first %}{% if grupo %} · {{ grupo.name }}{% elif user.is_superuser %} · Administrador{% endif %}{% endwith %}
+                                </span>
+                            </a>
                         </li>
                         <li class="nav-item">
                             <form method="post" action="{% url 'cuentas:logout' %}" class="mb-0">

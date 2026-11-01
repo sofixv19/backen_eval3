@@ -22,6 +22,11 @@ urlpatterns = [
     path('panel/supervisor/', views.dashboard_supervisor, name='dashboard_supervisor'),
     path('panel/administrativo/', views.dashboard_administrativo, name='dashboard_administrativo'),
 
+    # Mi perfil (cualquier usuario autenticado)
+    path('mi-perfil/', views.mi_perfil, name='mi_perfil'),
+    path('mi-perfil/quitar-foto/', views.quitar_foto, name='quitar_foto'),
+    path('mi-perfil/cambiar-clave/', views.CambiarClaveView.as_view(), name='cambiar_clave'),
+
     # Gestión de usuarios (solo perfil Administrador)
     path('usuarios/', views.usuarios_listado, name='usuarios_listado'),
     path('usuarios/nuevo/', views.usuario_crear, name='usuario_crear'),
