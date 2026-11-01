@@ -5,6 +5,7 @@ Evaluación Sumativa 2: la información que en la Evaluación 1 vivía en
 `data/actividades.json` ahora se modela con relaciones reales hacia
 `delegaciones.Delegacion`, más un catálogo de categorías.
 """
+from django.conf import settings
 from django.db import models
 from django.urls import reverse
 
@@ -72,3 +73,40 @@ class Actividad(models.Model):
 
     def get_absolute_url(self):
         return reverse('gestion:detalle', args=[self.pk])
+
+
+class SeguimientoActividad(models.Model):
+    """Segunda transacción operacional (trabajo en equipo): registro del
+    seguimiento de una actividad.
+
+    Cada registro relaciona una Actividad con el Usuario que la revisó,
+    guarda el cambio de estado (anterior -> nuevo) y una observación. Al
+    guardarse, también actualiza el estado de la Actividad, ambas cosas
+    dentro de una misma transacción de base de datos (transaction.atomic).
+    """
+
+    actividad = models.ForeignKey(
+        Actividad,
+        on_delete=models.CASCADE,
+        related_name='seguimientos',
+        verbose_name='Actividad',
+    )
+    responsable = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='seguimientos_realizados',
+        verbose_name='Registrado por',
+    )
+    estado_anterior = models.CharField('Estado anterior', max_length=20, choices=Actividad.Estado.choices)
+    estado_nuevo = models.CharField('Nuevo estado', max_length=20, choices=Actividad.Estado.choices)
+    observacion = models.TextField('Observación')
+    fecha = models.DateTimeField('Fecha del seguimiento', auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Seguimiento de actividad'
+        verbose_name_plural = 'Seguimientos de actividades'
+        ordering = ['-fecha']
+
+    def __str__(self):
+        return f'{self.actividad.codigo}: {self.estado_anterior} -> {self.estado_nuevo}'

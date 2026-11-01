@@ -6,6 +6,9 @@
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
     <a href="{% url 'gestion:listado' %}" class="small">&larr; Volver al listado</a>
     <div class="deleg-card-botones">
+        {% if perms.gestion.add_seguimientoactividad %}
+        <a href="{% url 'gestion:registrar_seguimiento' actividad.id %}" class="btn btn-sm btn-institucional">Registrar seguimiento</a>
+        {% endif %}
         {% if perms.gestion.change_actividad %}
         <a href="{% url 'gestion:editar' actividad.id %}" class="btn btn-sm btn-outline-secondary">Modificar</a>
         {% endif %}
@@ -68,15 +71,41 @@
         <div>
             <span class="deleg-detalle-label">Estado</span>
             <p class="mb-0">
-                {% if actividad.estado == "Pendiente" %}
-                    <span class="badge-estado badge-pendiente">{{ actividad.estado }}</span>
-                {% elif actividad.estado == "En proceso" %}
-                    <span class="badge-estado badge-en-proceso">{{ actividad.estado }}</span>
-                {% else %}
-                    <span class="badge-estado badge-realizado">{{ actividad.estado }}</span>
-                {% endif %}
+                {% include "gestion/_badge_estado.html" with estado=actividad.estado %}
             </p>
         </div>
     </div>
 </div>
+
+<h2 class="h5 mt-5 mb-3">Historial de seguimiento</h2>
+{% if seguimientos %}
+<div class="table-responsive">
+<table class="table bg-white align-middle">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Cambio de estado</th>
+            <th>Observación</th>
+            <th>Registrado por</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in seguimientos %}
+        <tr>
+            <td class="text-nowrap">{{ s.fecha|date:"d-m-Y H:i" }}</td>
+            <td class="text-nowrap">
+                {% include "gestion/_badge_estado.html" with estado=s.estado_anterior %}
+                &rarr;
+                {% include "gestion/_badge_estado.html" with estado=s.estado_nuevo %}
+            </td>
+            <td>{{ s.observacion }}</td>
+            <td>{{ s.responsable.get_username|default:"—" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<p class="text-muted">Esta actividad todavía no tiene seguimientos registrados.</p>
+{% endif %}
 {% endblock %}

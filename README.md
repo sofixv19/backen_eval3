@@ -8,12 +8,13 @@ sistema** y lo reemplaza por una aplicación real con **autenticación,
 perfiles de usuario, recuperación de contraseña por correo, dashboards
 diferenciados y mantenedores/transacciones con Django Templates**.
 
-**Trabajo en equipo:** Sofía Veliz Espinosa (autenticación, perfiles,
-recuperación de clave, dashboards y los mantenedores de Delegaciones y
-Categorías) e Ignacio Sepúlveda (dominio de Cargos y Metas
-institucionales, integrado aquí como tercer mantenedor completo —CRUD con
-permisos por perfil—, a partir de su módulo original de registro y
-gestión de cargos municipales).
+**Trabajo en equipo (3 integrantes):** Sofía Veliz Espinosa, Ignacio
+Sepúlveda y Elías. Según la pauta, por cada integrante adicional se
+agregan 2 mantenedores y 1 transacción, por lo que el sistema incluye
+**6 mantenedores y 3 transacciones**. Los módulos de Cargos, Metas y
+Funcionarios parten del avance de Ignacio (gestionCargosApp y
+registroActividadesApp), integrados aquí con CRUD real y permisos por
+perfil.
 
 ## Qué cambió respecto a la Evaluación 2
 
@@ -23,9 +24,10 @@ gestión de cargos municipales).
 | Sin inicio de sesión (sitio público) | Sistema de autenticación de Django: login, logout, vistas protegidas |
 | Un solo tipo de usuario (superusuario) | 3 perfiles (grupos): **Administrador**, **Supervisor**, **Administrativo**, cada uno con permisos distintos |
 | Sin recuperación de contraseña | Recuperación de contraseña por correo electrónico (Gmail SMTP), con token seguro |
-| Botones Agregar/Modificar/Eliminar "en construcción" | CRUD completamente funcional en **Delegaciones** y **Categorías** (mantenedores) |
-| "Registrar actividad" sin formulario real | Formulario funcional con validaciones (la **transacción**: relaciona Delegación + Categoría) |
+| Botones Agregar/Modificar/Eliminar "en construcción" | CRUD completamente funcional en **6 mantenedores** (Delegaciones, Categorías, Cargos, Metas, Funcionarios, Vecinos) |
+| "Registrar actividad" sin formulario real | **3 transacciones** con validaciones: Registrar actividad, Seguimiento de actividad y Solicitud vecinal |
 | Un solo panel (portada con gráficos) | **3 dashboards**, uno por perfil, con accesos distintos |
+| — | Página **Mi perfil** con foto, edición de datos y cambio de contraseña |
 
 La base de datos relacional, el despliegue en AWS EC2 y el control de
 versiones en GitHub (requisitos de la Evaluación 2) se mantienen.
@@ -44,9 +46,13 @@ delegaciones/        # Aplicación 1: mantenedor de Delegaciones (CRUD completo)
   forms.py              #   DelegacionForm
 gestion/             # Aplicación 2: mantenedor de Categorías + transacción de Actividades
   forms.py              #   CategoriaForm, ActividadForm
-cargos/              # Aplicación 3: mantenedor de Cargos y Metas (trabajo en equipo)
-  forms.py              #   CargoFuncionForm, MetaProyectoForm
+cargos/              # Aplicación 3: mantenedores de Cargos y de Metas institucionales
   management/commands/cargar_cargos.py  # Carga data/cargos.json de ejemplo
+funcionarios/        # Aplicación 4: mantenedor de Funcionarios (RUT validado)
+  rut.py                #   Validación del RUT chileno (dígito verificador)
+  management/commands/cargar_funcionarios.py
+atencion/            # Aplicación 5: mantenedor de Vecinos + transacción Solicitudes vecinales
+  management/commands/cargar_atencion.py
 data/                # JSON originales de la Evaluación 1 (fuente para el seed)
 static/              # Bootstrap local, CSS propio e imágenes
 templates/           # Plantilla base compartida
@@ -64,11 +70,11 @@ con:
 python manage.py crear_grupos
 ```
 
-| Perfil | Delegaciones | Categorías | Actividades | Cargos y metas | Usuarios |
-|---|---|---|---|---|---|
-| **Administrador** | CRUD completo | CRUD completo | CRUD completo | CRUD completo | Crear, editar, ver |
-| **Supervisor** | Solo ver | Crear, editar, ver | Crear, editar, ver | Crear, editar, ver | — |
-| **Administrativo** | Solo ver | Solo ver | Crear (registrar), ver | Solo ver | — |
+| Perfil | Mantenedores | Transacciones | Usuarios |
+|---|---|---|---|
+| **Administrador** | CRUD completo en los 6 | Las 3 (registrar/modificar/eliminar actividades, seguimiento, registrar y cerrar solicitudes) | Crear, editar, ver |
+| **Supervisor** | Crear, editar y ver (no elimina). Delegaciones: solo ver | Las 3 (registrar/modificar actividades, seguimiento, registrar y cerrar solicitudes) | — |
+| **Administrativo** | Solo ver (excepto Vecinos: puede registrar) | Registrar actividades y solicitudes vecinales (no seguimiento, no cerrar, no modificar) | — |
 
 Cada usuario pertenece a un único grupo, asignado desde **Gestión de
 usuarios** (`/cuentas/usuarios/`, exclusivo del perfil Administrador). Al
@@ -87,18 +93,35 @@ la carpeta `media/`, que no se sube a GitHub.
 
 ## Mantenedores y transacción
 
-- **Mantenedor de Delegaciones** (`/delegaciones/`): crear, buscar, listar,
-  modificar y eliminar delegaciones.
-- **Mantenedor de Categorías** (`/gestion/categorias/`): crear, buscar,
-  listar, modificar y eliminar categorías de actividad.
-- **Transacción — Registrar actividad** (`/gestion/nueva/`): formulario que
-  relaciona una Delegación y una Categoría para dejar constancia de una
-  actividad, con validaciones (código único, campos obligatorios).
-- **Mantenedor de Cargos y metas** (`/cargos/`): crear, buscar, listar,
-  modificar y eliminar cargos municipales, cada uno con sus metas
-  institucionales asociadas (ítem medible, valor objetivo, ponderación).
-  Tercer mantenedor del sistema, aportado por Ignacio Sepúlveda e
-  integrado al sistema de permisos por perfil.
+**Mantenedores (6)** — cada uno permite crear, buscar, listar, modificar y eliminar:
+
+- **Delegaciones** (`/delegaciones/`).
+- **Categorías** (`/gestion/categorias/`).
+- **Cargos** (`/cargos/`).
+- **Metas institucionales** (`/cargos/metas/`): ítem medible, valor
+  objetivo y ponderación (máx. 100%) por cargo.
+- **Funcionarios** (`/funcionarios/`): RUT con dígito verificador validado
+  y único, correo único, delegación y cargo.
+- **Vecinos** (`/atencion/vecinos/`): RUT validado, dirección y delegación
+  de su sector.
+
+Las relaciones usan `on_delete=PROTECT` donde corresponde: no se puede
+eliminar una delegación, cargo, funcionario o vecino que tenga registros
+asociados (el sistema muestra un mensaje en vez de un error).
+
+**Transacciones (3):**
+
+1. **Registrar actividad** (`/gestion/nueva/`): relaciona Delegación +
+   Categoría, con código único normalizado.
+2. **Seguimiento de actividad** (botón en la ficha de cada actividad):
+   registra el cambio de estado + observación (mín. 10 caracteres, estado
+   distinto al actual) y actualiza la actividad en una misma transacción
+   de base de datos (`transaction.atomic` + `select_for_update`). Queda un
+   historial con usuario y fecha.
+3. **Solicitud vecinal** (`/atencion/solicitudes/nueva/`): relaciona Vecino
+   + Delegación + Funcionario asignado (debe pertenecer a esa delegación y
+   estar activo), genera un código `SOL-00001`, guarda quién la registró y
+   luego se puede cerrar con una respuesta.
 
 ## Recuperación de contraseña por correo
 
@@ -144,9 +167,11 @@ Guía para generar la contraseña de aplicación: ver comentarios en
    ```bash
    python manage.py cargar_datos_iniciales
    ```
-6.1. Cargar los cargos y metas de ejemplo:
+6.1. Cargar cargos, metas, funcionarios, vecinos y solicitudes de ejemplo:
    ```bash
    python manage.py cargar_cargos
+   python manage.py cargar_funcionarios
+   python manage.py cargar_atencion
    ```
 7. Crear un superusuario (tiene acceso total, equivalente al perfil
    Administrador, sin necesidad de asignarle grupo):
@@ -173,6 +198,8 @@ variables `DB_*`), agregando dos pasos nuevos después de `migrate`:
 python manage.py crear_grupos
 python manage.py cargar_datos_iniciales
 python manage.py cargar_cargos
+python manage.py cargar_funcionarios
+python manage.py cargar_atencion
 python manage.py createsuperuser
 python manage.py collectstatic --noinput
 python manage.py runserver 0.0.0.0:8000

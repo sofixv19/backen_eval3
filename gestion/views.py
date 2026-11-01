@@ -8,6 +8,7 @@ por la pauta (relaciona Delegación + Categoría, con formulario y
 validaciones). Todo protegido con el sistema de permisos de Django.
 """
 from django.contrib import messages
+from django.db import transaction
 from django.db.models import Q
 from django.db.models.deletion import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
@@ -15,7 +16,7 @@ from django.urls import reverse
 
 from cuentas.decorators import permiso_requerido
 
-from .forms import ActividadForm, CategoriaForm
+from .forms import ActividadForm, CategoriaForm, SeguimientoForm
 from .models import Actividad, Categoria
 from .services import grados_donut, resumen_por_estado
 
@@ -53,7 +54,7 @@ def listado(request):
 
 @permiso_requerido('gestion.view_actividad')
 def detalle(request, actividad_id):
-    """Ficha de detalle de una actividad específica."""
+    """Ficha de detalle de una actividad, con su historial de seguimiento."""
 
     actividad = get_object_or_404(
         Actividad.objects.select_related('delegacion', 'categoria'),
@@ -63,8 +64,49 @@ def detalle(request, actividad_id):
     contexto = {
         'titulo_pagina': f'Actividad {actividad.codigo}',
         'actividad': actividad,
+        'seguimientos': actividad.seguimientos.select_related('responsable'),
     }
     return render(request, 'gestion/detalle.html', contexto)
+
+
+# ---------------------------------------------------------------------------
+# Segunda transacción: seguimiento de una actividad. Guarda el registro de
+# seguimiento Y actualiza el estado de la actividad dentro de una misma
+# transacción de base de datos (si algo falla, no se guarda ninguno).
+# ---------------------------------------------------------------------------
+
+@permiso_requerido('gestion.add_seguimientoactividad')
+def registrar_seguimiento(request, actividad_id):
+    actividad = get_object_or_404(Actividad.objects.select_related('delegacion', 'categoria'), pk=actividad_id)
+
+    if request.method == 'POST':
+        form = SeguimientoForm(request.POST, actividad=actividad)
+        if form.is_valid():
+            with transaction.atomic():
+                # Bloquea la fila para que dos usuarios no cambien el estado a la vez.
+                actividad = Actividad.objects.select_for_update().get(pk=actividad.pk)
+                seguimiento = form.save(commit=False)
+                seguimiento.actividad = actividad
+                seguimiento.responsable = request.user
+                seguimiento.estado_anterior = actividad.estado
+                seguimiento.save()
+                actividad.estado = seguimiento.estado_nuevo
+                actividad.save(update_fields=['estado'])
+            messages.success(
+                request,
+                f'Seguimiento registrado: "{actividad.codigo}" pasó de '
+                f'{seguimiento.estado_anterior} a {seguimiento.estado_nuevo}.',
+            )
+            return redirect(actividad.get_absolute_url())
+    else:
+        form = SeguimientoForm(actividad=actividad)
+
+    contexto = {
+        'titulo_pagina': f'Seguimiento de {actividad.codigo}',
+        'actividad': actividad,
+        'form': form,
+    }
+    return render(request, 'gestion/seguimiento_form.html', contexto)
 
 
 @permiso_requerido('gestion.view_actividad')

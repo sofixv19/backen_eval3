@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block titulo %}{{ titulo_pagina }}{% endblock %}
+
+{% block contenido %}
+<a href="{% url 'gestion:detalle' actividad.id %}" class="small d-inline-block mb-3">&larr; Volver a la actividad</a>
+
+<div class="info-card" style="max-width: 640px; margin: 0 auto;">
+    <p class="text-uppercase small eyebrow mb-1">Transacción · Seguimiento de actividad</p>
+    <h1 class="h4 mb-3">Registrar seguimiento de {{ actividad.codigo }}</h1>
+
+    <div class="seguimiento-resumen mb-4">
+        <div><span class="deleg-detalle-label">Delegación</span>{{ actividad.delegacion }}</div>
+        <div><span class="deleg-detalle-label">Categoría</span>{{ actividad.categoria }}</div>
+        <div>
+            <span class="deleg-detalle-label">Estado actual</span>
+            {% include "gestion/_badge_estado.html" with estado=actividad.estado %}
+        </div>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="mb-3">
+            <label for="{{ field.id_for_label }}" class="form-label">
+                {{ field.label }} <span class="text-danger">*</span>
+            </label>
+            {{ field }}
+            {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+        </div>
+        {% endfor %}
+        <p class="form-text">Quedará registrado a tu nombre ({{ user.get_username }}) con la fecha y hora actual.</p>
+        <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn btn-institucional">Guardar seguimiento</button>
+            <a href="{% url 'gestion:detalle' actividad.id %}" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

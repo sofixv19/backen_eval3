@@ -11,6 +11,7 @@ urlpatterns = [
     path('<int:actividad_id>/', views.detalle, name='detalle'),
     path('<int:actividad_id>/editar/', views.editar, name='editar'),
     path('<int:actividad_id>/eliminar/', views.eliminar, name='eliminar'),
+    path('<int:actividad_id>/seguimiento/', views.registrar_seguimiento, name='registrar_seguimiento'),
 
     # Mantenedor de Categorías (Evaluación Sumativa 3)
     path('categorias/', views.categoria_listado, name='categoria_listado'),

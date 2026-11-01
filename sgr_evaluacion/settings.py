@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'delegaciones',
     'gestion',
     'cargos',
+    'funcionarios',
+    'atencion',
 ]
 
 MIDDLEWARE = [

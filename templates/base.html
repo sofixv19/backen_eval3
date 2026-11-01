@@ -28,17 +28,32 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'cuentas:panel' %}">Mi panel</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'delegaciones:listado' %}">Delegaciones</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Mantenedores</a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'delegaciones:listado' %}">Delegaciones</a></li>
+                                <li><a class="dropdown-item" href="{% url 'gestion:categoria_listado' %}">Categorías</a></li>
+                                <li><a class="dropdown-item" href="{% url 'cargos:listado' %}">Cargos</a></li>
+                                <li><a class="dropdown-item" href="{% url 'cargos:metas_listado' %}">Metas</a></li>
+                                <li><a class="dropdown-item" href="{% url 'funcionarios:listado' %}">Funcionarios</a></li>
+                                <li><a class="dropdown-item" href="{% url 'atencion:vecinos_listado' %}">Vecinos</a></li>
+                            </ul>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'gestion:categoria_listado' %}">Categorías</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'gestion:listado' %}">Actividades</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'cargos:listado' %}">Cargos</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Transacciones</a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'gestion:listado' %}">Actividades y seguimiento</a></li>
+                                <li><a class="dropdown-item" href="{% url 'atencion:solicitudes_listado' %}">Solicitudes vecinales</a></li>
+                                {% if perms.gestion.add_actividad or perms.atencion.add_solicitudvecinal %}
+                                <li><hr class="dropdown-divider"></li>
+                                {% endif %}
+                                {% if perms.gestion.add_actividad %}
+                                <li><a class="dropdown-item" href="{% url 'gestion:crear' %}">+ Registrar actividad</a></li>
+                                {% endif %}
+                                {% if perms.atencion.add_solicitudvecinal %}
+                                <li><a class="dropdown-item" href="{% url 'atencion:solicitud_crear' %}">+ Registrar solicitud</a></li>
+                                {% endif %}
+                            </ul>
                         </li>
                         {% if perms.auth.view_user %}
                         <li class="nav-item">

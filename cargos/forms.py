@@ -18,3 +18,9 @@ class MetaProyectoForm(EstiloBootstrapMixin, forms.ModelForm):
     class Meta:
         model = MetaProyecto
         fields = ['cargo', 'item_medible', 'valor_objetivo', 'unidad', 'ponderador']
+
+    def clean_ponderador(self):
+        ponderador = self.cleaned_data['ponderador']
+        if ponderador > 100:
+            raise forms.ValidationError('La ponderación no puede ser mayor a 100%.')
+        return ponderador

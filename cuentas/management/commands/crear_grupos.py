@@ -9,14 +9,16 @@ Uso:
 
 Resumen de los permisos que otorga cada perfil:
 
-- Administrador: acceso total (crear/modificar/eliminar/ver) a
-  Delegaciones, Categorías, Actividades y Cargos/Metas, más gestión de
-  usuarios.
-- Supervisor: ve todo; puede administrar Categorías, Actividades y
-  Cargos/Metas (crear/modificar), pero NO puede eliminar ni gestionar
-  Delegaciones.
-- Administrativo: solo puede ver la información y registrar actividades
-  nuevas (la "transacción"); no puede modificar ni eliminar nada.
+- Administrador: acceso total a los 6 mantenedores (Delegaciones,
+  Categorías, Cargos, Metas, Funcionarios, Vecinos), a las 3 transacciones
+  (Actividades, Seguimiento de actividades, Solicitudes vecinales) y a la
+  gestión de usuarios.
+- Supervisor: ve todo; puede crear y modificar en los mantenedores (salvo
+  Delegaciones, que solo ve) y usar las 3 transacciones, pero NO puede
+  eliminar nada ni gestionar usuarios.
+- Administrativo: solo ve la información, y solo puede registrar
+  actividades, vecinos y solicitudes vecinales; no puede modificar,
+  eliminar ni hacer seguimiento.
 """
 from django.contrib.auth.models import Group, Permission
 from django.core.management.base import BaseCommand
@@ -25,26 +27,41 @@ from django.core.management.base import BaseCommand
 # "accion_nombremodelo" (ej. 'add_delegacion'), tal como los nombra Django.
 PERMISOS_POR_GRUPO = {
     'Administrador': [
+        # 6 mantenedores: CRUD completo
         ('delegaciones', 'delegacion', ['add', 'change', 'delete', 'view']),
         ('gestion', 'categoria', ['add', 'change', 'delete', 'view']),
-        ('gestion', 'actividad', ['add', 'change', 'delete', 'view']),
         ('cargos', 'cargofuncion', ['add', 'change', 'delete', 'view']),
         ('cargos', 'metaproyecto', ['add', 'change', 'delete', 'view']),
+        ('funcionarios', 'funcionario', ['add', 'change', 'delete', 'view']),
+        ('atencion', 'vecino', ['add', 'change', 'delete', 'view']),
+        # 3 transacciones
+        ('gestion', 'actividad', ['add', 'change', 'delete', 'view']),
+        ('gestion', 'seguimientoactividad', ['add', 'view']),
+        ('atencion', 'solicitudvecinal', ['add', 'change', 'view']),
+        # Gestión de usuarios
         ('auth', 'user', ['add', 'change', 'view']),
     ],
     'Supervisor': [
         ('delegaciones', 'delegacion', ['view']),
         ('gestion', 'categoria', ['add', 'change', 'view']),
-        ('gestion', 'actividad', ['add', 'change', 'view']),
         ('cargos', 'cargofuncion', ['add', 'change', 'view']),
         ('cargos', 'metaproyecto', ['add', 'change', 'view']),
+        ('funcionarios', 'funcionario', ['add', 'change', 'view']),
+        ('atencion', 'vecino', ['add', 'change', 'view']),
+        ('gestion', 'actividad', ['add', 'change', 'view']),
+        ('gestion', 'seguimientoactividad', ['add', 'view']),
+        ('atencion', 'solicitudvecinal', ['add', 'change', 'view']),
     ],
     'Administrativo': [
         ('delegaciones', 'delegacion', ['view']),
         ('gestion', 'categoria', ['view']),
-        ('gestion', 'actividad', ['add', 'view']),
         ('cargos', 'cargofuncion', ['view']),
         ('cargos', 'metaproyecto', ['view']),
+        ('funcionarios', 'funcionario', ['view']),
+        ('atencion', 'vecino', ['add', 'view']),
+        ('gestion', 'actividad', ['add', 'view']),
+        ('gestion', 'seguimientoactividad', ['view']),
+        ('atencion', 'solicitudvecinal', ['add', 'view']),
     ],
 }
 

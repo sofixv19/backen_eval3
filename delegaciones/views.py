@@ -9,6 +9,7 @@ crear_grupos.py para el detalle de qué perfil tiene cada permiso).
 """
 from django.contrib import messages
 from django.db.models import Count, Q
+from django.db.models.deletion import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
@@ -155,7 +156,16 @@ def eliminar(request, slug):
 
     if request.method == 'POST':
         nombre = delegacion.nombre
-        delegacion.delete()
+        try:
+            delegacion.delete()
+        except ProtectedError:
+            # Funcionario, Vecino y SolicitudVecinal -> Delegacion usan PROTECT.
+            messages.error(
+                request,
+                f'No se puede eliminar "{nombre}": tiene funcionarios, vecinos o solicitudes asociadas. '
+                'Reasígnalos a otra delegación primero.',
+            )
+            return redirect(delegacion.get_absolute_url())
         messages.success(request, f'Delegación "{nombre}" eliminada correctamente.')
         return redirect('delegaciones:listado')
 

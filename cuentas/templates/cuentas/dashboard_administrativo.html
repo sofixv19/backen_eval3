@@ -10,21 +10,21 @@
 
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-4">
-        <div class="stat-box stat-box-azul">
-            <div class="stat-valor">{{ total_actividades }}</div>
-            <div class="stat-label">Actividades totales</div>
-        </div>
-    </div>
-    <div class="col-6 col-md-4">
         <div class="stat-box stat-box-ambar">
             <div class="stat-valor">{{ actividades_pendientes }}</div>
-            <div class="stat-label">Pendientes</div>
+            <div class="stat-label">Actividades pendientes</div>
         </div>
     </div>
     <div class="col-6 col-md-4">
+        <div class="stat-box stat-box-azul">
+            <div class="stat-valor">{{ solicitudes_abiertas }}</div>
+            <div class="stat-label">Solicitudes vecinales abiertas</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
         <div class="stat-box stat-box-verde">
-            <div class="stat-valor">{{ actividades_realizadas }}</div>
-            <div class="stat-label">Realizadas</div>
+            <div class="stat-valor">{{ total_vecinos }}</div>
+            <div class="stat-label">Vecinos registrados</div>
         </div>
     </div>
 </div>
@@ -35,9 +35,11 @@
             <div class="info-card-icon icon-azul">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 12h4l2 7 4-14 2 7h6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
-            <h2 class="h6">Registrar actividad</h2>
-            <p class="text-muted small">Tu perfil puede registrar actividades nuevas, pero no modificarlas ni eliminarlas.</p>
-            <a href="{% url 'gestion:crear' %}" class="btn btn-gestion btn-sm w-100">Registrar actividad</a>
+            <h2 class="h6">Registrar</h2>
+            <p class="text-muted small">Tu perfil puede registrar actividades, vecinos y solicitudes, pero no modificarlos ni eliminarlos.</p>
+            <a href="{% url 'gestion:crear' %}" class="btn btn-gestion btn-sm w-100 mb-2">Registrar actividad</a>
+            <a href="{% url 'atencion:solicitud_crear' %}" class="btn btn-gestion btn-sm w-100 mb-2">Registrar solicitud vecinal</a>
+            <a href="{% url 'atencion:vecino_crear' %}" class="btn btn-gestion btn-sm w-100">Registrar vecino</a>
         </div>
     </div>
     <div class="col-md-6">
@@ -46,11 +48,38 @@
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" fill="none"/></svg>
             </div>
             <h2 class="h6">Consultar información</h2>
-            <p class="text-muted small">Acceso de solo lectura a delegaciones, categorías y actividades.</p>
-            <a href="{% url 'delegaciones:listado' %}" class="btn btn-outline-secondary btn-sm w-100 mb-2">Ver delegaciones</a>
-            <a href="{% url 'gestion:listado' %}" class="btn btn-outline-secondary btn-sm w-100">Ver actividades</a>
-            <a href="{% url 'cargos:listado' %}" class="btn btn-outline-secondary btn-sm w-100 mt-2">Ver cargos y metas</a>
+            <p class="text-muted small">Acceso de solo lectura al resto del sistema.</p>
+            <div class="row g-2">
+                <div class="col-6"><a href="{% url 'delegaciones:listado' %}" class="btn btn-outline-secondary btn-sm w-100">Delegaciones</a></div>
+                <div class="col-6"><a href="{% url 'gestion:listado' %}" class="btn btn-outline-secondary btn-sm w-100">Actividades</a></div>
+                <div class="col-6"><a href="{% url 'funcionarios:listado' %}" class="btn btn-outline-secondary btn-sm w-100">Funcionarios</a></div>
+                <div class="col-6"><a href="{% url 'atencion:vecinos_listado' %}" class="btn btn-outline-secondary btn-sm w-100">Vecinos</a></div>
+                <div class="col-6"><a href="{% url 'cargos:listado' %}" class="btn btn-outline-secondary btn-sm w-100">Cargos y metas</a></div>
+                <div class="col-6"><a href="{% url 'atencion:solicitudes_listado' %}" class="btn btn-outline-secondary btn-sm w-100">Solicitudes</a></div>
+            </div>
         </div>
     </div>
+</div>
+
+<h2 class="h5 mt-5 mb-3">Mis últimas solicitudes registradas</h2>
+<div class="table-responsive">
+<table class="table bg-white align-middle">
+    <thead>
+        <tr><th>Código</th><th>Fecha</th><th>Vecino</th><th>Prioridad</th><th>Estado</th></tr>
+    </thead>
+    <tbody>
+        {% for s in mis_solicitudes %}
+        <tr>
+            <td><a href="{% url 'atencion:solicitud_detalle' s.id %}">{{ s.codigo }}</a></td>
+            <td>{{ s.fecha|date:"d-m-Y" }}</td>
+            <td>{{ s.vecino.nombre }}</td>
+            <td>{% include "atencion/_badge_prioridad.html" with prioridad=s.prioridad %}</td>
+            <td>{% if s.estado == "Abierta" %}<span class="badge-estado badge-en-proceso">Abierta</span>{% else %}<span class="badge-estado badge-realizado">Cerrada</span>{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-muted text-center py-4">Todavía no has registrado solicitudes.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
 </div>
 {% endblock %}

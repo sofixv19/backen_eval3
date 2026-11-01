@@ -18,7 +18,9 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 
+from atencion.models import SolicitudVecinal, Vecino
 from delegaciones.models import Delegacion
+from funcionarios.models import Funcionario
 from gestion.models import Actividad, Categoria
 
 from .decorators import grupo_requerido
@@ -80,14 +82,27 @@ def panel(request):
     return redirect('cuentas:login')
 
 
+def _resumen_operacional():
+    """Indicadores que se muestran en los paneles."""
+    return {
+        'total_delegaciones': Delegacion.objects.count(),
+        'total_categorias': Categoria.objects.count(),
+        'total_actividades': Actividad.objects.count(),
+        'actividades_pendientes': Actividad.objects.filter(estado=Actividad.Estado.PENDIENTE).count(),
+        'actividades_realizadas': Actividad.objects.filter(estado=Actividad.Estado.REALIZADO).count(),
+        'total_funcionarios': Funcionario.objects.filter(activo=True).count(),
+        'total_vecinos': Vecino.objects.count(),
+        'solicitudes_abiertas': SolicitudVecinal.objects.filter(estado=SolicitudVecinal.Estado.ABIERTA).count(),
+    }
+
+
 @grupo_requerido('Administrador')
 def dashboard_administrador(request):
     contexto = {
         'titulo_pagina': 'Panel de Administrador',
-        'total_delegaciones': Delegacion.objects.count(),
-        'total_categorias': Categoria.objects.count(),
-        'total_actividades': Actividad.objects.count(),
         'total_usuarios': Usuario.objects.count(),
+        'ultimas_solicitudes': SolicitudVecinal.objects.select_related('vecino', 'delegacion')[:5],
+        **_resumen_operacional(),
     }
     return render(request, 'cuentas/dashboard_administrador.html', contexto)
 
@@ -96,10 +111,12 @@ def dashboard_administrador(request):
 def dashboard_supervisor(request):
     contexto = {
         'titulo_pagina': 'Panel de Supervisor',
-        'total_delegaciones': Delegacion.objects.count(),
-        'total_categorias': Categoria.objects.count(),
-        'total_actividades': Actividad.objects.count(),
-        'actividades_pendientes': Actividad.objects.filter(estado=Actividad.Estado.PENDIENTE).count(),
+        'actividades_por_revisar': (
+            Actividad.objects.select_related('delegacion')
+            .exclude(estado=Actividad.Estado.REALIZADO)
+            .order_by('fecha')[:5]
+        ),
+        **_resumen_operacional(),
     }
     return render(request, 'cuentas/dashboard_supervisor.html', contexto)
 
@@ -108,9 +125,10 @@ def dashboard_supervisor(request):
 def dashboard_administrativo(request):
     contexto = {
         'titulo_pagina': 'Panel Administrativo',
-        'total_actividades': Actividad.objects.count(),
-        'actividades_pendientes': Actividad.objects.filter(estado=Actividad.Estado.PENDIENTE).count(),
-        'actividades_realizadas': Actividad.objects.filter(estado=Actividad.Estado.REALIZADO).count(),
+        'mis_solicitudes': (
+            SolicitudVecinal.objects.filter(registrada_por=request.user).select_related('vecino')[:5]
+        ),
+        **_resumen_operacional(),
     }
     return render(request, 'cuentas/dashboard_administrativo.html', contexto)
 

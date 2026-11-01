@@ -11,6 +11,8 @@ urlpatterns = [
     path('delegaciones/', include('delegaciones.urls')),
     path('gestion/', include('gestion.urls')),
     path('cargos/', include('cargos.urls')),
+    path('funcionarios/', include('funcionarios.urls')),
+    path('atencion/', include('atencion.urls')),
 ]
 
 # Sirve las fotos de perfil subidas por los usuarios (solo con DEBUG=True,

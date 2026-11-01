@@ -20,5 +20,8 @@ class EstiloBootstrapMixin:
             clase_actual = campo.widget.attrs.get('class', '')
             if isinstance(campo.widget, forms.CheckboxInput):
                 campo.widget.attrs['class'] = (clase_actual + ' form-check-input').strip()
+            elif isinstance(campo.widget, forms.Select):
+                # "form-select" muestra la flecha de lista desplegable.
+                campo.widget.attrs['class'] = (clase_actual + ' form-select').strip()
             else:
                 campo.widget.attrs['class'] = (clase_actual + ' form-control').strip()

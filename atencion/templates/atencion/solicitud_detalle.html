@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block titulo %}Solicitud {{ solicitud.codigo }}{% endblock %}
+
+{% block contenido %}
+<a href="{% url 'atencion:solicitudes_listado' %}" class="small d-inline-block mb-3">&larr; Volver a solicitudes</a>
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+        <p class="text-uppercase small eyebrow mb-1">Solicitud vecinal · {{ solicitud.tipo }}</p>
+        <h1 class="h2 mb-0">{{ solicitud.codigo }}</h1>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+        {% include "atencion/_badge_prioridad.html" with prioridad=solicitud.prioridad %}
+        {% if solicitud.estado == "Abierta" %}
+        <span class="badge-estado badge-en-proceso">Abierta</span>
+        {% else %}
+        <span class="badge-estado badge-realizado">Cerrada</span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="deleg-detalle">
+    <div class="deleg-detalle-item">
+        <div>
+            <span class="deleg-detalle-label">Vecino/a</span>
+            <p class="mb-0">{{ solicitud.vecino.nombre }} · {{ solicitud.vecino.rut }}</p>
+            <p class="mb-0 small text-muted">{{ solicitud.vecino.direccion }} · {{ solicitud.vecino.telefono }}</p>
+        </div>
+    </div>
+    <div class="deleg-detalle-item">
+        <div>
+            <span class="deleg-detalle-label">Delegación</span>
+            <p class="mb-0">{{ solicitud.delegacion }}</p>
+        </div>
+    </div>
+    <div class="deleg-detalle-item">
+        <div>
+            <span class="deleg-detalle-label">Funcionario asignado</span>
+            <p class="mb-0">{{ solicitud.funcionario.nombre }}</p>
+            <p class="mb-0 small text-muted">{{ solicitud.funcionario.cargo }} · {{ solicitud.funcionario.email }}</p>
+        </div>
+    </div>
+    <div class="deleg-detalle-item">
+        <div>
+            <span class="deleg-detalle-label">Ingresada</span>
+            <p class="mb-0">{{ solicitud.fecha|date:"d-m-Y H:i" }} por {{ solicitud.registrada_por.get_username|default:"—" }}</p>
+        </div>
+    </div>
+    <div class="deleg-detalle-item deleg-detalle-full">
+        <div>
+            <span class="deleg-detalle-label">Descripción</span>
+            <p class="mb-0">{{ solicitud.descripcion }}</p>
+        </div>
+    </div>
+    {% if solicitud.estado == "Cerrada" %}
+    <div class="deleg-detalle-item deleg-detalle-full">
+        <div>
+            <span class="deleg-detalle-label">Respuesta · cerrada el {{ solicitud.fecha_cierre|date:"d-m-Y H:i" }}</span>
+            <p class="mb-0">{{ solicitud.respuesta }}</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if solicitud.estado == "Abierta" and perms.atencion.change_solicitudvecinal %}
+<div class="info-card mt-4" style="max-width: 640px;">
+    <h2 class="h6 mb-3">Cerrar solicitud</h2>
+    <form method="post" action="{% url 'atencion:solicitud_cerrar' solicitud.id %}" novalidate>
+        {% csrf_token %}
+        <label for="{{ form_cierre.respuesta.id_for_label }}" class="form-label">{{ form_cierre.respuesta.label }}</label>
+        {{ form_cierre.respuesta }}
+        {% for error in form_cierre.respuesta.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+        <button type="submit" class="btn btn-institucional btn-sm mt-3">Cerrar solicitud</button>
+    </form>
+</div>
+{% endif %}
+{% endblock %}
