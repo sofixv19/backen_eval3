@@ -44,7 +44,7 @@
     <div class="deleg-detalle-item">
         <div>
             <span class="deleg-detalle-label">Ingresada</span>
-            <p class="mb-0">{{ solicitud.fecha|date:"d-m-Y H:i" }} por {{ solicitud.registrada_por.get_username|default:"—" }}</p>
+            <p class="mb-0">{{ solicitud.fecha|date:"d-m-Y H:i" }}{% if solicitud.registrada_por %} por {{ solicitud.registrada_por.get_username }}{% endif %}</p>
         </div>
     </div>
     <div class="deleg-detalle-item deleg-detalle-full">

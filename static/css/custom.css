@@ -686,9 +686,19 @@ code {
   border-top: 3px solid var(--color-institucional);
   border-radius: 16px;
   padding: 2rem 1.75rem;
-  height: 100%;
   box-shadow: 0 6px 18px rgba(30, 20, 20, .14);
   transition: transform .15s ease, box-shadow .15s ease;
+}
+
+/* Solo dentro de una fila de columnas las tarjetas se estiran para quedar
+   del mismo alto; sueltas (formularios, login) usan su alto natural. */
+.row > [class*="col"] > .info-card {
+  height: 100%;
+}
+
+/* Las tarjetas de formulario no "saltan" al pasar el mouse. */
+.info-card:has(form) {
+  transform: none !important;
 }
 
 .info-card:hover {
