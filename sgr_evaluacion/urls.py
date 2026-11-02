@@ -1,7 +1,7 @@
 from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
+from django.views.static import serve
 from django.views.generic import RedirectView
 
 urlpatterns = [
@@ -15,7 +15,9 @@ urlpatterns = [
     path('atencion/', include('atencion.urls')),
 ]
 
-# Sirve las fotos de perfil subidas por los usuarios (solo con DEBUG=True,
-# que es como corre el servidor de desarrollo en local y en la instancia EC2).
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Sirve las fotos subidas por los usuarios (perfil y evidencias). Se deja
+# activo también con DEBUG=False, porque la instancia EC2 usa el servidor
+# de Django (runserver) y no un servidor web aparte para los archivos.
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+]

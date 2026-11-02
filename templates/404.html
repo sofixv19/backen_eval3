@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block titulo %}Página no encontrada{% endblock %}
+
+{% block contenido %}
+<div class="en-construccion">
+    <div class="display-4 fw-bold mb-2" style="color: var(--rojo, #920000);">404</div>
+    <h1 class="h4 mb-2">Página no encontrada</h1>
+    <p class="text-muted mb-4">
+        La dirección que escribiste no existe en el sistema o fue movida.
+        Revisa el enlace o vuelve al inicio.
+    </p>
+    <a href="{% url 'cuentas:panel' %}" class="btn btn-institucional">Volver al inicio</a>
+</div>
+{% endblock %}
